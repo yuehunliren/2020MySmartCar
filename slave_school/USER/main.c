@@ -2,9 +2,20 @@
 #include "jf_data.h"
 #include "multi_button.h"
 
-#define LINE_LEN                12             //数据长度
-#define symbals 20
+#define LINE_LEN                13             //数据长度
+#define symbals 10
 #define chazhi 30
+
+#define white 100
+
+/*添加定义变量*/
+uint8 BEN_FLAG,STA_FLAG;
+
+
+
+
+
+
 uint8 temp_buff[LINE_LEN];                      //从机向主机发送数据BUFF
 
 int16 slave_encoder_RB;                       //从机右后编码器值
@@ -59,7 +70,7 @@ void process_data(void)
 
     temp_buff[7] = 0xB2;                         //功能字
     temp_buff[8] = tag3[symbals];            //数据1
-   // temp_buff[8] = 0x05;
+    //temp_buff[8] = 0x05;
     temp_buff[9] = tag5;                     //数据2
     if (buflag == 0)
     {
@@ -69,8 +80,8 @@ void process_data(void)
     {
         temp_buff[10] = 0xA2;
     }
-
-    temp_buff[11] = 0xEE;                        //帧尾
+    temp_buff[11] = STA_FLAG;
+    temp_buff[12] = 0xEE;                        //帧尾
 }
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -192,8 +203,8 @@ void whu(void)
         for (i = MT9V03X_H - 2; i >= 0; i--)      //取左右边界
         {
             tag3[i] = 97;                          //取中线
-            tag1[i] = 138;
-            tag2[i] = 50;
+            tag1[i] = 184;
+            tag2[i] = 10;
             tag6 = 0;
             tag7 = 0;
             for (w = tag3[i]; w < MT9V03X_W - 1; w++)
@@ -204,6 +215,10 @@ void whu(void)
                     tag6 = 1;
                     break;
                 }
+                if (mt9v03x_image[i][w] < white)
+                {
+                    tag6 = 1;
+                }
             }
             for (w = tag3[i]; w >= 0; w--)
             {
@@ -212,6 +227,10 @@ void whu(void)
                     tag2[i] = w;
                     tag7 = 1;
                     break;
+                }
+                if (mt9v03x_image[i][w] < white)
+                {
+                    tag7 = 1;
                 }
             }
             if (tag6 == 0 || tag7 == 0)
@@ -253,6 +272,10 @@ void whu(void)
             }
             else tag8 = 0;
             tag3[i] = (tag1[i] + tag2[i]) / 2;               //取中线，改变后面计算
+            if (tag1[i] < 107 || tag2[i] > 87)
+            {
+                tag3[i] = 97;
+            }
             if (i == 30)
                     {
                     if (tag1[i] < 107 || tag2[i] > 87)
@@ -261,24 +284,53 @@ void whu(void)
                     }
                     }
         }
+
+
+
+
+/*添加代码*/
+
+
+                int32 a = 0;
+//               for (int16 m = 0; m < 50; m++)
+//               {
+//                   if (abs(tag3[m] - (188 / 2)) < 20)
+//                   {
+//                       a++;
+//                   }
+//               }
+
+               a = abs(tag3[1]-tag3[48]);
+               if (a > 5)
+               {
+                   BEN_FLAG = 1;
+                   STA_FLAG = 0;
+               }
+               else
+               {
+                   BEN_FLAG = 0;
+                   STA_FLAG = 1;
+               }
+
+
 }
 int main(void)
 {
-    //uint8 yu1;
-
     DisableGlobalIRQ();
     board_init();           //务必保留，本函数用于初始化MPU 时钟 调试串口
+    mt9v03x_init();
+//--------------------两块板子之间的连接初始化----------------//
+    uart_init(UART_1, 460800, UART1_TX_A9, UART1_RX_A10);
+    gpio_init(B0, GPO, 0, GPIO_PIN_CONFIG);  //B0为两个板子之间的连接
+    timer_pit_interrupt_ms(TIMER_4, 5);      //定时器4 5ms定时器中断
+//-------------------按键初始化--------------------//
     gpio_init(C14, GPI, 1,GPIO_INT_CONFIG);
     button_init(&button1, read_c14gpio,0);
     button_attach(&button1, PRESS_UP, btn1_press_up_Handler);
+//------------------编码器的初始化--------------//
     timer_quad_init(TIMER_2, TIMER2_CHA_A15, TIMER2_CHB_B3);
     timer_quad_init(TIMER_3, TIMER3_CHA_B4, TIMER3_CHB_B5);
-    gpio_init(B0, GPO, 0, GPIO_PIN_CONFIG);  //B0为两个板子之间的连接
-    uart_init(UART_1, 460800, UART1_TX_A9, UART1_RX_A10);
-    timer_pit_interrupt_ms(TIMER_4, 5);      //定时器4 5ms定时器中断
     button_start(&button1);
-    systick_delay_ms(300);  //延时300ms，等待主板其他外设上电成功
-    mt9v03x_init();
     EnableGlobalIRQ(0);
     while(1)
     {
@@ -291,7 +343,7 @@ int main(void)
                     twwo(yu1);*/
                     whu();
                 }
-        //printf("runing!\r\n");                            //此处编写需要循环执行的代码
+        // 此处编写需要循环执行的代码
     }
 }
 

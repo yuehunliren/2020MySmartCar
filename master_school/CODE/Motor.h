@@ -1,6 +1,6 @@
 #ifndef __MOTOR_H__
 #define __MOTOR_H__
-#define PWM_xianfu 5000
+#define PWM_xianfu 8000
 #include "headfile.h"
 typedef struct PID
 {

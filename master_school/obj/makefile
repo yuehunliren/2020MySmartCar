@@ -41,34 +41,34 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 SECONDARY_FLASH += \
-master_525_1.hex \
+master_school.hex \
 
 SECONDARY_LIST += \
-master_525_1.lst \
+master_school.lst \
 
 SECONDARY_SIZE += \
-master_525_1.siz \
+master_school.siz \
 
 
 # 所有目标
-all: master_525_1.elf secondary-outputs
+all: master_school.elf secondary-outputs
 
 # 工具调用
-master_525_1.elf: $(OBJS) $(USER_OBJS)
-	@	@	riscv-none-embed-gcc -march=rv32imac -mabi=ilp32 -msmall-data-limit=8 -mno-save-restore -O0 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -fno-common -Wunused -Wuninitialized  -g -T .ld -nostartfiles -Xlinker --gc-sections -L"../" -Wl,-Map,"master_525_1.map" --specs=nano.specs --specs=nosys.specs -o "master_525_1.elf" $(OBJS) $(USER_OBJS) $(LIBS)
+master_school.elf: $(OBJS) $(USER_OBJS)
+	@	@	riscv-none-embed-gcc -march=rv32imac -mabi=ilp32 -msmall-data-limit=8 -mno-save-restore -O0 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -fno-common -Wunused -Wuninitialized  -g -T .ld -nostartfiles -Xlinker --gc-sections -L"../" -Wl,-Map,"master_school.map" --specs=nano.specs --specs=nosys.specs -o "master_school.elf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@	@
-master_525_1.hex: master_525_1.elf
-	@	riscv-none-embed-objcopy -O ihex "master_525_1.elf"  "master_525_1.hex"
+master_school.hex: master_school.elf
+	@	riscv-none-embed-objcopy -O ihex "master_school.elf"  "master_school.hex"
 	@	@
-master_525_1.lst: master_525_1.elf
-	@	riscv-none-embed-objdump --source --all-headers --demangle --line-numbers --wide "master_525_1.elf" > "master_525_1.lst"
+master_school.lst: master_school.elf
+	@	riscv-none-embed-objdump --source --all-headers --demangle --line-numbers --wide "master_school.elf" > "master_school.lst"
 	@	@
-master_525_1.siz: master_525_1.elf
-	@	riscv-none-embed-size --format=berkeley "master_525_1.elf"
+master_school.siz: master_school.elf
+	@	riscv-none-embed-size --format=berkeley "master_school.elf"
 	@	@
 # 其他目标
 clean:
-	-$(RM) $(ASM_UPPER_DEPS)$(OBJS)$(SECONDARY_FLASH)$(SECONDARY_LIST)$(SECONDARY_SIZE)$(ASM_DEPS)$(S_DEPS)$(S_UPPER_DEPS)$(C_DEPS) master_525_1.elf
+	-$(RM) $(ASM_UPPER_DEPS)$(OBJS)$(SECONDARY_FLASH)$(SECONDARY_LIST)$(SECONDARY_SIZE)$(ASM_DEPS)$(S_DEPS)$(S_UPPER_DEPS)$(C_DEPS) master_school.elf
 	-@
 secondary-outputs: $(SECONDARY_FLASH) $(SECONDARY_LIST) $(SECONDARY_SIZE)
 
